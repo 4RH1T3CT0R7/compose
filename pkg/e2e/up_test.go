@@ -95,10 +95,9 @@ func TestUpDependenciesNotStopped(t *testing.T) {
 	if err != nil {
 		var exitErr *exec.ExitError
 		errors.As(err, &exitErr)
-		if exitErr.ExitCode() == -1 {
-			t.Fatalf("`compose up` was killed: %v", err)
-		}
-		require.Equal(t, 130, exitErr.ExitCode())
+		// Process is expected to die from re-raised SIGINT signal
+		assert.Assert(t, exitErr.ExitCode() == -1 || exitErr.ExitCode() == 130,
+			"`compose up` exited with unexpected code: %v", err)
 	}
 
 	RequireServiceState(t, c, "app", "exited")
