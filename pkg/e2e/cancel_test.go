@@ -77,6 +77,8 @@ func TestComposeCancel(t *testing.T) {
 			// Process should be killed by re-raised SIGINT signal ("signal: interrupt").
 			// In some CI environments the signal may not terminate the process, resulting
 			// in "exit status 130" or "exit status 255".
+			assert.Assert(t, err != nil,
+				"expected compose to exit with error after SIGINT\nSTDOUT:\n%s\nSTDERR:\n%s\n", stdout.String(), stderr.String())
 			errMsg := err.Error()
 			assert.Assert(t,
 				strings.Contains(errMsg, "signal: interrupt") ||

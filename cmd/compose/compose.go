@@ -117,7 +117,6 @@ func AdaptCmd(fn CobraCommand) func(cmd *cobra.Command, args []string) error {
 			caughtSignal.Store(sig)
 			cancel()
 			signal.Stop(s)
-			close(s)
 		}()
 
 		err := fn(ctx, cmd, args)
