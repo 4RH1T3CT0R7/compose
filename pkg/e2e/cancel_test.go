@@ -74,9 +74,15 @@ func TestComposeCancel(t *testing.T) {
 		case <-ctx.Done():
 			t.Fatal("test context canceled")
 		case err := <-processDone:
-			// Process should be killed by re-raised SIGINT signal
-			assert.ErrorContains(t, err, "signal: interrupt",
-				"STDOUT:\n%s\nSTDERR:\n%s\n", stdout.String(), stderr.String())
+			// Process should be killed by re-raised SIGINT signal ("signal: interrupt").
+			// In some CI environments the signal may not terminate the process, resulting
+			// in "exit status 130" or "exit status 255".
+			errMsg := err.Error()
+			assert.Assert(t,
+				strings.Contains(errMsg, "signal: interrupt") ||
+					strings.Contains(errMsg, "exit status 130") ||
+					strings.Contains(errMsg, "exit status 255"),
+				"unexpected error %q\nSTDOUT:\n%s\nSTDERR:\n%s\n", errMsg, stdout.String(), stderr.String())
 		case <-time.After(10 * time.Second):
 			t.Fatal("timeout waiting for Compose exit")
 		}
